@@ -1,0 +1,136 @@
+import { useState, useEffect } from 'react';
+import { AuthCard } from './components/AuthCard';
+import { ProductCatalog } from './components/ProductCatalog';
+import { CartDrawer } from './components/CartDrawer';
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: 'buyer' | 'vendor' | 'admin';
+}
+
+interface CartItem {
+  id: number;
+  title: string;
+  price: string;
+  business_name: string;
+  quantity: number;
+}
+
+function App() {
+  const [user, setUser] = useState<User | null>(null);
+  const [cart, setCart] = useState<CartItem[]>([]);
+
+  // Hydrate user and session states instantly from localStorage upon initialization
+  useEffect(() => {
+    const savedUser = localStorage.getItem('jumia_user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        console.error('Failed to parse active user session tracking data:', e);
+      }
+    }
+  }, []);
+
+  const handleAuthSuccess = (authenticatedUser: User) => {
+    setUser(authenticatedUser);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('jumia_token');
+    localStorage.removeItem('jumia_user');
+    setUser(null);
+    setCart([]);
+  };
+
+  const handleAddToCart = (product: any) => {
+    setCart((prevCart) => {
+      // Check if the item already exists in the shopper's active cart session
+      const existingIndex = prevCart.findIndex((item) => item.id === product.id);
+      if (existingIndex > -1) {
+        const updatedCart = [...prevCart];
+        updatedCart[existingIndex].quantity += 1;
+        return updatedCart;
+      }
+      // Append a fresh line item record to the array stack if it's completely new
+      return [
+        ...prevCart,
+        {
+          id: product.id,
+          title: product.title,
+          price: product.price,
+          business_name: product.business_name,
+          quantity: 1,
+        },
+      ];
+    });
+  };
+
+  const handleRemoveFromCart = (productId: number) => {
+    setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
+  };
+
+  const handleClearCart = () => {
+    setCart([]);
+  };
+
+  return (
+    <div style={{ backgroundColor: '#f5f5f5', minHeight: '100vh', margin: 0, padding: 0, fontFamily: 'sans-serif' }}>
+      {/* Global Brand Navigation Header bar */}
+      <header style={{ backgroundColor: '#fff', borderBottom: '1px solid #e0e0e0', padding: '15px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+        <h1 style={{ color: '#f57c00', margin: 0, fontSize: '26px', fontWeight: 'black', letterSpacing: '-0.5px' }}>
+          JUMIA <span style={{ color: '#333', fontSize: '16px', fontWeight: 'normal' }}>Clone Workspace</span>
+        </h1>
+        
+        <div>
+          {user ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              <span style={{ fontSize: '14px', color: '#555' }}>
+                Welcome, <span style={{ fontWeight: 'bold', color: '#333' }}>{user.name}</span> 
+                <span style={{ marginLeft: '8px', padding: '3px 8px', borderRadius: '12px', backgroundColor: '#f57c0020', color: '#f57c00', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                  {user.role}
+                </span>
+              </span>
+              <button onClick={handleLogout} style={{ padding: '6px 12px', border: '1px solid #ccc', borderRadius: '4px', backgroundColor: '#fff', color: '#d32f2f', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>
+                Logout
+              </button>
+            </div>
+          ) : (
+            <span style={{ fontSize: '14px', color: '#888', fontWeight: 'bold' }}>Guest Session Dashboard</span>
+          )}
+        </div>
+      </header>
+
+      {/* Main Responsive Grid Layout Content */}
+      <main style={{ maxWidth: '1400px', margin: '30px auto', padding: '0 20px', display: 'grid', gridTemplateColumns: '1fr', gap: '30px' }}>
+        
+        {/* If the current session tracking context is completely unauthenticated, serve the gateway gate */}
+        {!user && <AuthCard onAuthSuccess={handleAuthSuccess} />}
+
+        {/* Core Multi-Vendor Consumer Portal Grid Layout */}
+        <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '30px', alignItems: 'start', opacity: user ? 1 : 0.4, pointerEvents: user ? 'auto' : 'none' }}>
+          
+          <div style={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e0e0e0', padding: '15px' }}>
+            <h2 style={{ margin: '0 0 10px 10px', color: '#333', fontSize: '20px' }}>Discover Jumia Listings</h2>
+            <ProductCatalog onAddToCart={handleAddToCart} />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+            <CartDrawer cartItems={cart} onRemoveItem={handleRemoveFromCart} onClearCart={handleClearCart} />
+            {!user && (
+              <div style={{ padding: '15px', border: '1px dashed #f57c00', borderRadius: '8px', backgroundColor: '#f57c0005', color: '#f57c00', textAlign: 'center', fontSize: '14px', fontWeight: 'bold' }}>
+                ⚠️ Notice: You must log in using a Buyer profile account to activate full multi-vendor transactions.
+              </div>
+            )}
+          </div>
+
+        </div>
+
+      </main>
+    </div>
+  );
+}
+
+export default App;
