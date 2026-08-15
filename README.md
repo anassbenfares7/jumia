@@ -1,0 +1,104 @@
+# Jumia-Clone Marketplace (PERN)
+
+This repository contains a full-stack marketplace prototype built with PostgreSQL, Express (TypeScript), React (Vite + TypeScript), and Node.js. It is a PERN-style e-commerce application focused on core marketplace flows, including authentication, vendor management, product listings, orders, reviews, and admin actions.
+
+## 🏗️ Core Architecture
+
+- **Backend**: TypeScript + Express API featuring JWT authentication, role-based access control (RBAC), and a PostgreSQL database pool layer.
+- **Frontend**: React + Vite + TypeScript equipped with an Axios/Fetch API service wrapper.
+
+---
+
+## 📋 Requirements
+
+Before setting up the project, ensure you have the following installed:
+* **Node.js** (v18+ recommended)
+* **npm** (or yarn / pnpm)
+* **PostgreSQL** (Local instance or Cloud database)
+
+> 💡 **Tip:** It is highly recommended to run the backend and frontend in separate terminal windows.
+
+---
+
+## 🚀 Quick Start & Development Setup
+
+### 1. Database Setup
+1. Create a new PostgreSQL database (e.g., `jumia_clone`).
+2. Construct your database connection URL. It should follow this format:
+   ```text
+   postgres://username:password@localhost:5432/jumia_clone
+   ```
+
+### 2. Backend Installation
+Open a terminal and navigate to the backend directory:
+```bash
+cd backend
+npm install
+```
+
+### 3. Backend Environment Configuration
+Create a `.env` file inside the `backend/` root folder:
+```env
+PORT=5000
+DATABASE_URL=postgres://username:password@localhost:5432/jumia_clone
+JWT_SECRET=your_strong_jwt_secret_here
+```
+
+### 4. Database Schema Initialization
+Apply the initialization SQL script to seed your database schema:
+```bash
+psql "postgres://username:password@localhost:5432/jumia_clone" -f src/database/init.sql
+```
+*(Alternatively, copy and run the contents of `src/database/init.sql` inside your preferred database client tool like PgAdmin or DBeaver).*
+
+### 5. Running the Application
+
+#### Development Mode
+```bash
+# Run Backend (From /backend)
+npm run dev
+
+# Run Frontend (From /frontend)
+cd ../frontend
+npm install
+npm run dev
+```
+* The backend API server will listen on `http://localhost:5000` by default.
+* Open the Vite local URL printed in your frontend terminal console (usually `http://localhost:5173`).
+
+#### Production Mode
+```bash
+# Build and Start Backend
+cd backend
+npm run build
+npm start
+
+# Build and Preview Frontend
+cd frontend
+npm run build
+npm run preview
+```
+
+---
+
+## 🔌 API Routes Overview
+
+All endpoints are prefixed with `/api` and managed via Express routers.
+
+| Module | Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- | :--- |
+| **Auth** | POST | `/api/auth/register` | Create a new user account | Public |
+| | POST | `/api/auth/login` | Authenticate user & return JWT token | Public |
+| **Products**| GET | `/api/products` | Retrieve all product listings | Public |
+| | POST | `/api/products` | Create a new product listing | Vendor Only |
+| **Vendors** | POST | `/api/vendors/register-profile` | Register vendor business credentials | Authenticated |
+| | GET | `/api/vendors/orders` | Fetch orders belonging to the vendor | Vendor Only |
+| | PUT | `/api/vendors/orders/:id/status`| Update shipping/fulfillment status | Vendor Only |
+
+---
+
+## 🛠️ Project Configuration Notes
+
+* **Frontend API Client**: The frontend is pre-configured to communicate with `http://localhost:5000/api`. You can modify this base URL configuration inside `frontend/src/services/api.ts`.
+* **Token Management**: Upon a successful login, the frontend securely saves the session JWT within `localStorage` under the key string `jumia_token`.
+* **Database Layer**: Database connections utilize high-performance connection pooling via `node-postgres`, configured in `backend/src/config/db.ts`.
