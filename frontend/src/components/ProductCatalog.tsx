@@ -64,7 +64,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({ onAddToCart }) =
     <div style={{ fontFamily: 'sans-serif', padding: '20px' }}>
       {/* Search & Filter Header Bar */}
       <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', marginBottom: '30px', alignItems: 'center' }}>
-        <form onSubmit={handleSearchSubmit} style={{ display: 'flex', flexGrow: 1, maxWith: '500px' }}>
+        <form onSubmit={handleSearchSubmit} style={{ display: 'flex', flexGrow: 1, maxWidth: '500px' }}>
           <input
             type="text"
             placeholder="Search products, brands, categories on Jumia..."
