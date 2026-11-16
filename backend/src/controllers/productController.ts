@@ -2,6 +2,16 @@ import { Request, Response } from 'express';
 import { query } from '../config/db';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 
+export const getProductCategories = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const categories = await query('SELECT id, name, slug FROM categories ORDER BY name');
+    res.status(200).json({ status: 'success', data: categories.rows });
+  } catch (error) {
+    console.error('[Get Product Categories Error]:', error);
+    res.status(500).json({ status: 'error', message: 'Internal server error fetching product categories.' });
+  }
+};
+
 export const getAllProducts = async (req: Request, res: Response): Promise<void> => {
   try {
     // 1. Extract query parameters with defensive defaults

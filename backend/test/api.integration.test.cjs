@@ -142,6 +142,10 @@ test('critical marketplace API flows', async () => {
   createdUserIds.push(vendor.id);
   const vendorToken = vendorRegistration.data.data.token;
 
+  const missingProfile = await request('/api/vendors/profile', { token: vendorToken });
+  assert.equal(missingProfile.status, 200);
+  assert.equal(missingProfile.data.data, null);
+
   const profile = await request('/api/vendors/register-profile', {
     method: 'POST',
     token: vendorToken,
@@ -149,6 +153,11 @@ test('critical marketplace API flows', async () => {
   });
   assert.equal(profile.status, 201);
   assert.equal(profile.data.data.is_approved, false);
+
+  const savedProfile = await request('/api/vendors/profile', { token: vendorToken });
+  assert.equal(savedProfile.data.data.business_name, profile.data.data.business_name);
+  const forbiddenPendingVendors = await request('/api/admin/vendors/pending', { token: buyerToken });
+  assert.equal(forbiddenPendingVendors.status, 403);
 
   const categoriesResult = await pool.query(
     'SELECT id, slug FROM categories WHERE slug = ANY($1::text[])',
@@ -159,6 +168,9 @@ test('critical marketplace API flows', async () => {
   );
   assert.ok(categoryIds.electronics);
   assert.ok(categoryIds.fashion);
+  const categoriesApi = await request('/api/products/categories');
+  assert.equal(categoriesApi.status, 200);
+  assert.ok(categoriesApi.data.data.some((category) => category.slug === 'electronics'));
 
   const productTitle = `Integration-${runId}`;
   const electronicsProduct = {
@@ -205,6 +217,10 @@ test('critical marketplace API flows', async () => {
     { expiresIn: '1h' },
   );
 
+  const pendingVendors = await request('/api/admin/vendors/pending', { token: adminToken });
+  assert.equal(pendingVendors.status, 200);
+  assert.ok(pendingVendors.data.data.some((pendingVendor) => pendingVendor.id === profile.data.data.id));
+
   const approval = await request(`/api/admin/approve-vendor/${profile.data.data.id}`, {
     method: 'PUT',
     token: adminToken,
@@ -221,6 +237,10 @@ test('critical marketplace API flows', async () => {
     assert.equal(creation.status, 201);
     createdProductIds.push(creation.data.data.id);
   }
+
+  const vendorProducts = await request('/api/vendors/products', { token: vendorToken });
+  assert.equal(vendorProducts.status, 200);
+  assert.equal(vendorProducts.data.data.length, 2);
 
   const catalogPageOne = await request(
     `/api/products?page=1&limit=1&search=${encodeURIComponent(productTitle)}`,

@@ -2,6 +2,21 @@ import { Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { query } from '../config/db';
 
+export const getPendingVendors = async (_req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const result = await query(
+      `SELECT id, business_name, phone_number, created_at
+       FROM vendors
+       WHERE is_approved = false
+       ORDER BY created_at ASC`
+    );
+    res.status(200).json({ status: 'success', data: result.rows });
+  } catch (error) {
+    console.error('[Get Pending Vendors Error]:', error);
+    res.status(500).json({ status: 'error', message: 'Internal server error fetching pending vendors.' });
+  }
+};
+
 // Approve a vendor to allow them to sell products
 export const approveVendor = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {

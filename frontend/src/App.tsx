@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { AuthCard } from './components/AuthCard';
 import { ProductCatalog } from './components/ProductCatalog';
 import { CartDrawer } from './components/CartDrawer';
+import { BuyerOrderHistory } from './components/BuyerOrderHistory';
+import { VendorDashboard } from './components/VendorDashboard';
+import { AdminDashboard } from './components/AdminDashboard';
 import type { CartItem, Product, User } from './types';
 
 const isUser = (value: unknown): value is User => {
@@ -47,9 +50,13 @@ const getSavedUser = (): User | null => {
 function App() {
   const [user, setUser] = useState<User | null>(getSavedUser);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [activeView, setActiveView] = useState<'marketplace' | 'orders' | 'vendor' | 'admin'>(() =>
+    user?.role === 'vendor' ? 'vendor' : user?.role === 'admin' ? 'admin' : 'marketplace'
+  );
 
   const handleAuthSuccess = (authenticatedUser: User) => {
     setUser(authenticatedUser);
+    setActiveView(authenticatedUser.role === 'vendor' ? 'vendor' : authenticatedUser.role === 'admin' ? 'admin' : 'marketplace');
   };
 
   const handleLogout = () => {
@@ -57,6 +64,7 @@ function App() {
     localStorage.removeItem('jumia_user');
     setUser(null);
     setCart([]);
+    setActiveView('marketplace');
   };
 
   const handleAddToCart = (product: Product) => {
@@ -97,9 +105,21 @@ function App() {
           JUMIA <span style={{ color: '#333', fontSize: '16px', fontWeight: 'normal' }}>Clone Workspace</span>
         </h1>
         
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              {user.role === 'buyer' && (
+                <nav aria-label="Buyer navigation" style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => setActiveView('marketplace')} aria-pressed={activeView === 'marketplace'}>Marketplace</button>
+                  <button onClick={() => setActiveView('orders')} aria-pressed={activeView === 'orders'}>My Orders</button>
+                </nav>
+              )}
+              {user.role === 'vendor' && (
+                <button onClick={() => setActiveView('vendor')} aria-pressed={activeView === 'vendor'}>Vendor Workspace</button>
+              )}
+              {user.role === 'admin' && (
+                <button onClick={() => setActiveView('admin')} aria-pressed={activeView === 'admin'}>Admin Workspace</button>
+              )}
               <span style={{ fontSize: '14px', color: '#555' }}>
                 Welcome, <span style={{ fontWeight: 'bold', color: '#333' }}>{user.name}</span> 
                 <span style={{ marginLeft: '8px', padding: '3px 8px', borderRadius: '12px', backgroundColor: '#f57c0020', color: '#f57c00', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase' }}>
@@ -122,24 +142,33 @@ function App() {
         {/* If the current session tracking context is completely unauthenticated, serve the gateway gate */}
         {!user && <AuthCard onAuthSuccess={handleAuthSuccess} />}
 
-        {/* Core Multi-Vendor Consumer Portal Grid Layout */}
-        <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '30px', alignItems: 'start', opacity: user ? 1 : 0.4, pointerEvents: user ? 'auto' : 'none' }}>
-          
-          <div style={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e0e0e0', padding: '15px' }}>
-            <h2 style={{ margin: '0 0 10px 10px', color: '#333', fontSize: '20px' }}>Discover Jumia Listings</h2>
-            <ProductCatalog onAddToCart={handleAddToCart} />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-            <CartDrawer cartItems={cart} onRemoveItem={handleRemoveFromCart} onClearCart={handleClearCart} />
-            {!user && (
+        {!user && (
+          <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '30px', alignItems: 'start', opacity: 0.4, pointerEvents: 'none' }}>
+            <div style={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e0e0e0', padding: '15px' }}>
+              <h2 style={{ margin: '0 0 10px 10px', color: '#333', fontSize: '20px' }}>Discover Jumia Listings</h2>
+              <ProductCatalog onAddToCart={handleAddToCart} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+              <CartDrawer cartItems={cart} onRemoveItem={handleRemoveFromCart} onClearCart={handleClearCart} />
               <div style={{ padding: '15px', border: '1px dashed #f57c00', borderRadius: '8px', backgroundColor: '#f57c0005', color: '#f57c00', textAlign: 'center', fontSize: '14px', fontWeight: 'bold' }}>
-                ⚠️ Notice: You must log in using a Buyer profile account to activate full multi-vendor transactions.
+                Sign in as a buyer to use the cart and demo checkout.
               </div>
-            )}
+            </div>
           </div>
+        )}
 
-        </div>
+        {user?.role === 'buyer' && activeView === 'marketplace' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '30px', alignItems: 'start' }}>
+            <div style={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e0e0e0', padding: '15px' }}>
+              <h2 style={{ margin: '0 0 10px 10px', color: '#333', fontSize: '20px' }}>Discover Jumia Listings</h2>
+              <ProductCatalog onAddToCart={handleAddToCart} />
+            </div>
+            <CartDrawer cartItems={cart} onRemoveItem={handleRemoveFromCart} onClearCart={handleClearCart} />
+          </div>
+        )}
+        {user?.role === 'buyer' && activeView === 'orders' && <BuyerOrderHistory />}
+        {user?.role === 'vendor' && activeView === 'vendor' && <VendorDashboard />}
+        {user?.role === 'admin' && activeView === 'admin' && <AdminDashboard />}
 
       </main>
     </div>

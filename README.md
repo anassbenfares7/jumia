@@ -126,6 +126,13 @@ All endpoints are prefixed with `/api` and managed via Express routers.
 
 Checkout is demo-only: it creates an order and reserves inventory, but does not collect payment. Such orders remain `pending` and must not be treated as paid. After updating an existing database, re-run the documented `psql ... -f src/database/init.sql` command from `backend/`; the script also resets payment records created by the previous mock checkout. Do not use this checkout for a live store; a real payment provider and verified server-side payment confirmation are required before accepting real orders.
 
+### Marketplace workspaces
+
+- Buyers can browse and search listings, place demo orders, and review order history.
+- Vendors can submit a business profile for approval, create and review listings after approval, and update fulfillment statuses for their order items.
+- Administrators can approve pending vendor applications and remove products from the catalog.
+- Vendor-side product editing and removal are not available in this prototype; product removal is currently an administrator action.
+
 ---
 
 ## 🛠️ Project Configuration Notes

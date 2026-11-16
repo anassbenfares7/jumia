@@ -2,6 +2,52 @@ import { Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { query } from '../config/db';
 
+export const getVendorProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ status: 'error', message: 'Authentication required.' });
+      return;
+    }
+
+    const result = await query(
+      'SELECT id, business_name, phone_number, is_approved, created_at FROM vendors WHERE user_id = $1',
+      [req.user.id]
+    );
+    res.status(200).json({ status: 'success', data: result.rows[0] ?? null });
+  } catch (error) {
+    console.error('[Get Vendor Profile Error]:', error);
+    res.status(500).json({ status: 'error', message: 'Internal server error fetching vendor profile.' });
+  }
+};
+
+export const getVendorProducts = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ status: 'error', message: 'Authentication required.' });
+      return;
+    }
+
+    const vendorResult = await query('SELECT id FROM vendors WHERE user_id = $1', [req.user.id]);
+    if (vendorResult.rows.length === 0) {
+      res.status(403).json({ status: 'error', message: 'Access denied. Vendor profile not found.' });
+      return;
+    }
+
+    const products = await query(
+      `SELECT p.*, c.name AS category_name
+       FROM products p
+       JOIN categories c ON c.id = p.category_id
+       WHERE p.vendor_id = $1
+       ORDER BY p.created_at DESC`,
+      [vendorResult.rows[0].id]
+    );
+    res.status(200).json({ status: 'success', data: products.rows });
+  } catch (error) {
+    console.error('[Get Vendor Products Error]:', error);
+    res.status(500).json({ status: 'error', message: 'Internal server error fetching vendor products.' });
+  }
+};
+
 export const registerVendorProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { businessName, phoneNumber } = req.body;
