@@ -1,8 +1,17 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import API from '../services/api';
+import type { User } from '../types';
 
 interface AuthCardProps {
-  onAuthSuccess: (user: any) => void;
+  onAuthSuccess: (user: User) => void;
+}
+
+interface AuthResponse {
+  data: {
+    token: string;
+    user: User;
+  };
 }
 
 export const AuthCard: React.FC<AuthCardProps> = ({ onAuthSuccess }) => {
@@ -10,7 +19,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ onAuthSuccess }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('buyer');
+  const [role, setRole] = useState<'buyer' | 'vendor'>('buyer');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +32,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ onAuthSuccess }) => {
       const endpoint = isLogin ? '/auth/login' : '/auth/register';
       const payload = isLogin ? { email, password } : { name, email, password, role };
 
-      const response = await API.post(endpoint, payload);
+      const response = await API.post<AuthResponse>(endpoint, payload);
       const { token, user } = response.data.data;
 
       // Persist the sessions instantly into localStorage
@@ -31,9 +40,12 @@ export const AuthCard: React.FC<AuthCardProps> = ({ onAuthSuccess }) => {
       localStorage.setItem('jumia_user', JSON.stringify(user));
 
       onAuthSuccess(user);
-    } catch (err: any) {
-      console.error(err);
-      setErrorMsg(err.response?.data?.message || 'An error occurred during authentication.');
+    } catch (error: unknown) {
+      console.error(error);
+      const message = axios.isAxiosError<{ message?: string }>(error)
+        ? error.response?.data?.message
+        : undefined;
+      setErrorMsg(message || 'An error occurred during authentication.');
     } finally {
       setLoading(false);
     }
@@ -72,7 +84,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ onAuthSuccess }) => {
         {!isLogin && (
           <div style={{ marginBottom: '20px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Account Type</label>
-            <select value={role} onChange={(e) => setRole(e.target.value)} style={{ width: '100%', padding: '10px', boxSizing: 'border-box', borderRadius: '4px', border: '1px solid #ccc', backgroundColor: '#fff' }}>
+            <select value={role} onChange={(e) => setRole(e.target.value === 'vendor' ? 'vendor' : 'buyer')} style={{ width: '100%', padding: '10px', boxSizing: 'border-box', borderRadius: '4px', border: '1px solid #ccc', backgroundColor: '#fff' }}>
               <option value="buyer">Buyer / Shopper</option>
               <option value="vendor">Vendor / Seller</option>
             </select>

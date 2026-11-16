@@ -1,38 +1,52 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { AuthCard } from './components/AuthCard';
 import { ProductCatalog } from './components/ProductCatalog';
 import { CartDrawer } from './components/CartDrawer';
+import type { CartItem, Product, User } from './types';
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: 'buyer' | 'vendor' | 'admin';
-}
+const isUser = (value: unknown): value is User => {
+  if (
+    typeof value !== 'object' ||
+    value === null ||
+    !('id' in value) ||
+    !('name' in value) ||
+    !('email' in value) ||
+    !('role' in value)
+  ) {
+    return false;
+  }
 
-interface CartItem {
-  id: number;
-  title: string;
-  price: string;
-  business_name: string;
-  quantity: number;
-}
+  return (
+    typeof value.id === 'number' &&
+    typeof value.name === 'string' &&
+    typeof value.email === 'string' &&
+    (value.role === 'buyer' || value.role === 'vendor' || value.role === 'admin')
+  );
+};
+
+const getSavedUser = (): User | null => {
+  const savedUser = localStorage.getItem('jumia_user');
+  if (!savedUser) {
+    return null;
+  }
+
+  try {
+    const parsedUser: unknown = JSON.parse(savedUser);
+    if (isUser(parsedUser)) {
+      return parsedUser;
+    }
+
+    console.error('Stored user session data has an unexpected shape.');
+  } catch (error) {
+    console.error('Failed to parse active user session tracking data:', error);
+  }
+
+  return null;
+};
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(getSavedUser);
   const [cart, setCart] = useState<CartItem[]>([]);
-
-  // Hydrate user and session states instantly from localStorage upon initialization
-  useEffect(() => {
-    const savedUser = localStorage.getItem('jumia_user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (e) {
-        console.error('Failed to parse active user session tracking data:', e);
-      }
-    }
-  }, []);
 
   const handleAuthSuccess = (authenticatedUser: User) => {
     setUser(authenticatedUser);
@@ -45,16 +59,15 @@ function App() {
     setCart([]);
   };
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: Product) => {
     setCart((prevCart) => {
-      // Check if the item already exists in the shopper's active cart session
-      const existingIndex = prevCart.findIndex((item) => item.id === product.id);
-      if (existingIndex > -1) {
-        const updatedCart = [...prevCart];
-        updatedCart[existingIndex].quantity += 1;
-        return updatedCart;
+      const existingItem = prevCart.find((item) => item.id === product.id);
+      if (existingItem) {
+        return prevCart.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
       }
-      // Append a fresh line item record to the array stack if it's completely new
+
       return [
         ...prevCart,
         {

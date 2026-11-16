@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import API from '../services/api';
-
-interface CartItem {
-  id: number;
-  title: string;
-  price: string;
-  business_name: string;
-  quantity: number;
-}
+import type { CartItem } from '../types';
 
 interface CartDrawerProps {
   cartItems: CartItem[];
   onRemoveItem: (id: number) => void;
   onClearCart: () => void;
+}
+
+interface CheckoutResponse {
+  data: {
+    orderId: number;
+  };
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({ cartItems, onRemoveItem, onClearCart }) => {
@@ -35,13 +35,16 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ cartItems, onRemoveItem,
         quantity: item.quantity
       }));
 
-      const response = await API.post('/orders/checkout', { items: itemsPayload });
+      const response = await API.post<CheckoutResponse>('/orders/checkout', { items: itemsPayload });
       
       setSuccessMessage(`Order #${response.data.data.orderId} processed! Your purchase has been split across vendors successfully.`);
       onClearCart(); // Empty the cart on successful database write
-    } catch (err: any) {
-      console.error(err);
-      setErrorMessage(err.response?.data?.message || 'Checkout failed. Please ensure you are logged in as a buyer.');
+    } catch (error: unknown) {
+      console.error(error);
+      const message = axios.isAxiosError<{ message?: string }>(error)
+        ? error.response?.data?.message
+        : undefined;
+      setErrorMessage(message || 'Checkout failed. Please ensure you are logged in as a buyer.');
     } finally {
       setLoading(false);
     }
