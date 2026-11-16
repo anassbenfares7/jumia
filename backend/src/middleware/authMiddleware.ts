@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { env } from '../config/env';
 
 // Extend Express Request type definitions to safely hold our logged-in user's payload
 export interface AuthenticatedRequest extends Request {
@@ -21,7 +22,7 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as AuthenticatedRequest['user'];
+    const decoded = jwt.verify(token, env.jwtSecret) as AuthenticatedRequest['user'];
     req.user = decoded; // Attach the validated payload directly to the request object
     next(); // Pass control to the next middleware/controller function
   } catch (err) {

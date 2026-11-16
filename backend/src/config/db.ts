@@ -1,13 +1,11 @@
 import pg from 'pg';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import { env } from './env';
 
 const { Pool } = pg;
 
 // Initialize connection pool using our environment connection string
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: env.databaseUrl,
   // Production safeguard: scale up connections if traffic spikes
   max: 20, 
   idleTimeoutMillis: 30000, // Close idle connections after 30 seconds

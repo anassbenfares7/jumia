@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { query } from '../config/db';
+import { env } from '../config/env';
 
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -44,7 +45,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       role: newUser.rows[0].role
     };
 
-    const token = jwt.sign(userPayload, process.env.JWT_SECRET as string, { expiresIn: '24h' });
+    const token = jwt.sign(userPayload, env.jwtSecret, { expiresIn: '24h' });
 
     // 6. Production Success Response (omitting password hash)
     res.status(201).json({
@@ -98,7 +99,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       role: user.role
     };
 
-    const token = jwt.sign(userPayload, process.env.JWT_SECRET as string, { expiresIn: '24h' });
+    const token = jwt.sign(userPayload, env.jwtSecret, { expiresIn: '24h' });
 
     // 5. Secure Production Response
     res.status(200).json({

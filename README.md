@@ -41,8 +41,11 @@ Create a `.env` file inside the `backend/` root folder:
 ```env
 PORT=5000
 DATABASE_URL=postgres://username:password@localhost:5432/jumia_clone
-JWT_SECRET=your_strong_jwt_secret_here
+JWT_SECRET=replace_with_a_random_64_character_hex_secret
 ```
+Generate a secret locally with `node -p "require('crypto').randomBytes(32).toString('hex')"` and use the generated value. The backend requires a PostgreSQL URL with a host and database name, a `JWT_SECRET` of at least 32 characters, and a valid `PORT` (defaults to `5000`). URL-encode reserved characters in database credentials.
+
+The backend validates this configuration at startup and checks the PostgreSQL connection before listening. If the database is unavailable, the server exits with a clear error instead of starting in a broken state. The `/api/health` endpoint also checks database connectivity and returns HTTP 503 when it fails.
 
 ### 4. Database Schema Initialization
 Apply the initialization SQL script to create the schema and seed the default categories:
