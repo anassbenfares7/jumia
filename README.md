@@ -45,11 +45,19 @@ JWT_SECRET=your_strong_jwt_secret_here
 ```
 
 ### 4. Database Schema Initialization
-Apply the initialization SQL script to seed your database schema:
+Apply the initialization SQL script to create the schema and seed the default categories:
 ```bash
 psql "postgres://username:password@localhost:5432/jumia_clone" -f src/database/init.sql
 ```
 *(Alternatively, copy and run the contents of `src/database/init.sql` inside your preferred database client tool like PgAdmin or DBeaver).*
+
+The initialization script can be re-run against a fresh database or the schema from the previous version of this project. For other existing databases, review the schema differences and apply a migration before deploying; `CREATE TABLE IF NOT EXISTS` does not alter existing table definitions.
+
+For local development only, `src/database/seed.sql` inserts two sample products for the first approved vendor. Create and approve a development vendor before running it:
+```bash
+psql "postgres://username:password@localhost:5432/jumia_clone" -f src/database/seed.sql
+```
+Do not run the sample-data script in production.
 
 ### 5. Running the Application
 
