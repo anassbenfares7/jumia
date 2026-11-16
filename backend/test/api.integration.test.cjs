@@ -37,6 +37,7 @@ const createdProductIds = [];
 let buyerId;
 let server;
 let baseUrl;
+let schemaSql;
 
 const request = async (endpoint, { method = 'GET', token, body } = {}) => {
   const headers = { 'Content-Type': 'application/json' };
@@ -58,7 +59,7 @@ const request = async (endpoint, { method = 'GET', token, body } = {}) => {
 };
 
 before(async () => {
-  const schemaSql = await readFile(
+  schemaSql = await readFile(
     path.join(__dirname, '../src/database/init.sql'),
     'utf8',
   );
@@ -270,7 +271,16 @@ test('critical marketplace API flows', async () => {
     body: { items: [{ productId: electronicsId, quantity: 2 }] },
   });
   assert.equal(checkout.status, 201);
-  assert.equal(checkout.data.data.paymentStatus, 'completed');
+  assert.equal(checkout.data.data.paymentMode, 'demo');
+  assert.equal(checkout.data.data.paymentStatus, 'pending');
+  assert.match(checkout.data.message, /No payment was collected/);
+
+  const savedOrder = await pool.query(
+    'SELECT payment_status, stripe_intent_id FROM orders WHERE id = $1',
+    [checkout.data.data.orderId],
+  );
+  assert.equal(savedOrder.rows[0].payment_status, 'pending');
+  assert.equal(savedOrder.rows[0].stripe_intent_id, null);
 
   const oversell = await request('/api/orders/checkout', {
     method: 'POST',
@@ -289,6 +299,7 @@ test('critical marketplace API flows', async () => {
   assert.equal(buyerHistory.status, 200);
   assert.equal(buyerHistory.data.data.length, 1);
   assert.equal(buyerHistory.data.data[0].product_title, electronicsProduct.title);
+  assert.equal(buyerHistory.data.data[0].payment_status, 'pending');
 
   const unauthorizedReview = await request('/api/reviews', {
     method: 'POST',
@@ -335,4 +346,18 @@ test('critical marketplace API flows', async () => {
   assert.equal(publicReviews.status, 200);
   assert.equal(publicReviews.data.data.length, 1);
   assert.equal(publicReviews.data.data[0].reviewer_name, 'Integration Buyer');
+
+  const legacyOrder = await pool.query(
+    `INSERT INTO orders (buyer_id, total_amount, payment_status, stripe_intent_id)
+     VALUES ($1, 25, 'completed', 'mock_sandbox_stripe_intent_id')
+     RETURNING id`,
+    [buyerId],
+  );
+  await pool.query(schemaSql);
+  const correctedLegacyOrder = await pool.query(
+    'SELECT payment_status, stripe_intent_id FROM orders WHERE id = $1',
+    [legacyOrder.rows[0].id],
+  );
+  assert.equal(correctedLegacyOrder.rows[0].payment_status, 'pending');
+  assert.equal(correctedLegacyOrder.rows[0].stripe_intent_id, null);
 });

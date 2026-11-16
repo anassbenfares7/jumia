@@ -71,8 +71,8 @@ export const createCheckoutOrder = async (req: AuthenticatedRequest, res: Respon
 
     // 4. Create the parent master session order row
     const parentOrderResult = await client.query(
-      `INSERT INTO orders (buyer_id, total_amount, payment_status, stripe_intent_id) 
-       VALUES ($1, $2, 'completed', 'mock_sandbox_stripe_intent_id') 
+      `INSERT INTO orders (buyer_id, total_amount, payment_status)
+       VALUES ($1, $2, 'pending')
        RETURNING id, buyer_id, total_amount, payment_status, created_at`,
       [req.user.id, runningTotalCalculated]
     );
@@ -93,11 +93,12 @@ export const createCheckoutOrder = async (req: AuthenticatedRequest, res: Respon
 
     res.status(201).json({
       status: 'success',
-      message: 'Checkout processed and split across corresponding vendors successfully!',
+      message: 'Demo order created successfully. No payment was collected.',
       data: {
         orderId: createdParentOrderId,
-        totalPaid: runningTotalCalculated,
-        paymentStatus: 'completed',
+        totalAmount: runningTotalCalculated,
+        paymentMode: 'demo',
+        paymentStatus: 'pending',
         summary: parentOrderResult.rows[0]
       }
     });

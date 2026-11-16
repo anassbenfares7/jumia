@@ -81,6 +81,11 @@ CREATE TABLE IF NOT EXISTS reviews (
     UNIQUE (user_id, product_id)
 );
 
+UPDATE orders
+SET payment_status = 'pending', stripe_intent_id = NULL
+WHERE payment_status = 'completed'
+  AND stripe_intent_id = 'mock_sandbox_stripe_intent_id';
+
 CREATE INDEX IF NOT EXISTS idx_products_category_created_at
     ON products (category_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_products_vendor_id

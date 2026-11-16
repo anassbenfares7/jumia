@@ -122,6 +122,10 @@ All endpoints are prefixed with `/api` and managed via Express routers.
 | | GET | `/api/vendors/orders` | Fetch orders belonging to the vendor | Vendor Only |
 | | PUT | `/api/vendors/orders/:id/status`| Update shipping/fulfillment status | Vendor Only |
 
+### Checkout payment mode
+
+Checkout is demo-only: it creates an order and reserves inventory, but does not collect payment. Such orders remain `pending` and must not be treated as paid. After updating an existing database, re-run the documented `psql ... -f src/database/init.sql` command from `backend/`; the script also resets payment records created by the previous mock checkout. Do not use this checkout for a live store; a real payment provider and verified server-side payment confirmation are required before accepting real orders.
+
 ---
 
 ## 🛠️ Project Configuration Notes

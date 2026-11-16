@@ -37,7 +37,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ cartItems, onRemoveItem,
 
       const response = await API.post<CheckoutResponse>('/orders/checkout', { items: itemsPayload });
       
-      setSuccessMessage(`Order #${response.data.data.orderId} processed! Your purchase has been split across vendors successfully.`);
+      setSuccessMessage(`Demo order #${response.data.data.orderId} created. No payment was collected; this order is not paid.`);
       onClearCart(); // Empty the cart on successful database write
     } catch (error: unknown) {
       console.error(error);
@@ -53,6 +53,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ cartItems, onRemoveItem,
   return (
     <div style={{ padding: '20px', border: '1px solid #e0e0e0', borderRadius: '8px', backgroundColor: '#fff', width: '100%', boxSizing: 'border-box', fontFamily: 'sans-serif' }}>
       <h2 style={{ color: '#333', borderBottom: '2px solid #f57c00', paddingBottom: '10px', marginTop: 0 }}>Your Shopping Cart</h2>
+
+      <div style={{ padding: '12px', marginBottom: '15px', color: '#7a4b00', backgroundColor: '#fff3cd', border: '1px solid #ffeeba', borderRadius: '4px', fontSize: '14px' }}>
+        Demo mode only: no payment is collected, and orders are not marked as paid.
+      </div>
 
       {successMessage && (
         <div style={{ padding: '12px', marginBottom: '15px', color: '#155724', backgroundColor: '#d4edda', border: '1px solid #c3e6cb', borderRadius: '4px', fontSize: '14px' }}>
@@ -98,7 +102,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ cartItems, onRemoveItem,
           </div>
 
           <button onClick={handleCheckout} disabled={loading} style={{ width: '100%', padding: '14px', backgroundColor: '#f57c00', color: '#fff', border: 'none', borderRadius: '4px', fontSize: '16px', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}>
-            {loading ? 'Splitting & Processing...' : 'Proceed to Checkout (Sandbox Mode)'}
+            {loading ? 'Creating Demo Order...' : 'Place Demo Order (No Payment)'}
           </button>
         </div>
       )}
