@@ -13,7 +13,7 @@ import reviewRoutes from './routes/reviewRoutes';
 const app = express();
 
 app.use(helmet());
-app.use(cors());
+app.use(cors({ origin: env.corsOrigins }));
 app.use(express.json());
 
 // Mount API Domain Routes

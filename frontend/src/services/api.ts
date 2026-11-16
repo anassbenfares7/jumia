@@ -1,8 +1,31 @@
 import axios from 'axios';
 
-// Centralized API configuration
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
+if (!configuredApiUrl && import.meta.env.PROD) {
+  throw new Error('VITE_API_URL must be configured for production builds.');
+}
+
+const apiBaseUrl = configuredApiUrl || 'http://localhost:5000/api';
+let parsedApiUrl: URL;
+
+try {
+  parsedApiUrl = new URL(apiBaseUrl);
+} catch {
+  throw new Error('VITE_API_URL must be a valid absolute URL.');
+}
+
+if (
+  (parsedApiUrl.protocol !== 'http:' && parsedApiUrl.protocol !== 'https:') ||
+  parsedApiUrl.username ||
+  parsedApiUrl.password ||
+  parsedApiUrl.search ||
+  parsedApiUrl.hash
+) {
+  throw new Error('VITE_API_URL must be an http or https API URL without credentials or query parameters.');
+}
+
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: parsedApiUrl.toString().replace(/\/+$/, ''),
   headers: {
     'Content-Type': 'application/json',
   },
