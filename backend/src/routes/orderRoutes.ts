@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { createCheckoutOrder, getBuyerOrders } from '../controllers/orderController';
-import { authenticateToken } from '../middleware/authMiddleware';
+import { authenticateToken, authorizeRoles } from '../middleware/authMiddleware';
 
 const router = Router();
 
 // Secure all order routes with user identity verification
-router.use(authenticateToken);
+router.use(authenticateToken, authorizeRoles('buyer'));
 
 // Checkout processing
 router.post('/checkout', createCheckoutOrder);

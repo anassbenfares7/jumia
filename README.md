@@ -54,6 +54,15 @@ VITE_API_URL=http://localhost:5000/api
 ```
 For a production build, set `VITE_API_URL` to the public API base URL, including `/api`, and set the backend's `CORS_ORIGINS` to the frontend's public origin (for example, `https://shop.example.com`). `VITE_API_URL` is bundled into the browser application, so it must not contain secrets.
 
+### Backend API Integration Tests
+The backend integration suite requires a dedicated PostgreSQL database whose name contains `test`; it initializes the schema and removes the test records it creates. From `backend/`, set `TEST_DATABASE_URL` to that database and run:
+```powershell
+$env:TEST_DATABASE_URL = "postgres://username:password@localhost:5432/jumia_clone_test"
+npm test
+Remove-Item Env:TEST_DATABASE_URL
+```
+Do not point `TEST_DATABASE_URL` at a development or production database.
+
 ### 4. Database Schema Initialization
 Apply the initialization SQL script to create the schema and seed the default categories:
 ```bash
