@@ -106,6 +106,65 @@ npm run build
 npm run preview
 ```
 
+## Docker Staging
+
+The repository includes host-neutral Docker images and a PostgreSQL Compose stack.
+
+1. Copy `.env.docker.example` to `.env`.
+2. Replace every placeholder secret. Use a URL-safe PostgreSQL password and a `JWT_SECRET` of at least 32 characters.
+3. Set `CORS_ORIGINS` to the exact public frontend origin, including port when not using standard HTTPS.
+4. Set `VITE_API_URL` to the public API origin plus `/api`.
+5. Start the stack:
+   ```bash
+   docker compose up --build -d
+   ```
+6. Verify:
+   - Frontend: `http://localhost:8080/health`
+   - API health: `http://localhost:5000/api/health`
+   - Full frontend: `http://localhost:8080`
+
+PostgreSQL is initialized from `backend/src/database/init.sql` only on a new Docker volume. PostgreSQL data is persisted in the `postgres_data` volume. The API and database are not exposed as database ports on the host, while the API and frontend ports are configurable.
+
+For an existing database or external PostgreSQL host, do not rely on the Compose init script. Set `DATABASE_URL` through your hosting platform or a compose override, review schema differences, and apply migrations explicitly. Never deploy `backend/.env`, database credentials, or secrets in an image.
+
+For HTTPS deployments, terminate TLS at a reverse proxy or platform load balancer, set `CORS_ORIGINS` to the HTTPS frontend origin, set `VITE_API_URL` to the HTTPS API URL, and publish only the proxy-facing ports.
+
+## Staging and Operations
+
+### Launch checks
+
+After deployment, verify:
+
+1. `GET /api/health` returns HTTP 200 while PostgreSQL is available.
+2. The frontend loads over HTTPS and calls only the configured API URL.
+3. Buyer registration/login and cart demo checkout complete successfully.
+4. Vendor registration, pending approval, product listing, and fulfillment status updates work.
+5. Admin approval and product moderation work and reject unauthorized accounts.
+6. Demo orders remain `pending`; no order is marked paid.
+
+### Database backup and restore
+
+Create and verify an encrypted PostgreSQL backup before migrations:
+
+```bash
+docker compose exec -T postgres pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc > jumia-backup.dump
+```
+
+Restore to a clean database only after stopping writes:
+
+```bash
+docker compose exec -T postgres pg_restore --clean --if-exists -U "$POSTGRES_USER" -d "$POSTGRES_DB" < jumia-backup.dump
+```
+
+Store backups outside the host, use encryption and retention limits, and test restores periodically.
+
+### Monitoring and rollback
+
+- Monitor frontend/API/container health, PostgreSQL disk usage, API 5xx rates, authentication failures, and container restarts.
+- Use the platform or Docker logs for API and proxy logs; never log JWT secrets or database URLs.
+- Roll back by redeploying the previous known-good frontend/API image tags and restoring the database backup if the migration is incompatible.
+- Do not roll back a database after new writes unless it has been backed up and the application is taken out of service.
+
 ---
 
 ## 🔌 API Routes Overview

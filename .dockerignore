@@ -1,0 +1,11 @@
+.git
+.kilo
+.copilot
+HOSTING_READINESS_TASKS.md
+**/.env
+**/.env.*
+**/node_modules
+**/dist
+**/coverage
+**/*.log
+
