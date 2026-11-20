@@ -107,7 +107,6 @@
 }
 
 body {
-  min-width: 320px;
   min-height: 100vh;
   margin: 0;
   background: var(--bg-primary);
@@ -163,7 +162,8 @@ textarea:focus-visible {
 }
 
 .header-inner {
-  width: min(100% - 48px, var(--container-site-max));
+  width: calc(100% - 48px);
+  max-width: var(--container-site-max);
   min-height: inherit;
   margin: 0 auto;
   display: flex;
@@ -250,7 +250,8 @@ textarea:focus-visible {
 }
 
 .main-shell {
-  width: min(100% - 48px, var(--container-site-max));
+  width: calc(100% - 48px);
+  max-width: var(--container-site-max);
   margin: 0 auto;
   padding: var(--space-10) 0 var(--space-16);
 }
@@ -262,7 +263,8 @@ textarea:focus-visible {
 }
 
 .landing-hero {
-  width: min(100% - 48px, var(--container-site-max));
+  width: calc(100% - 48px);
+  max-width: var(--container-site-max);
   min-height: min(660px, calc(100vh - var(--navbar-height-landing)));
   margin: 0 auto;
   padding: clamp(48px, 8vw, 112px) 0;
@@ -274,6 +276,7 @@ textarea:focus-visible {
 
 .landing-copy {
   max-width: 690px;
+  min-width: 0;
 }
 
 .eyebrow {
@@ -295,6 +298,7 @@ textarea:focus-visible {
 }
 
 .landing-title {
+  width: 100%;
   max-width: 750px;
   font-size: var(--fs-hero);
   line-height: var(--lh-hero);
@@ -1033,6 +1037,10 @@ textarea:focus-visible {
     padding: var(--space-12) 0;
   }
 
+  .landing-title {
+    font-size: clamp(54px, 10vw, 80px);
+  }
+
   .auth-panel {
     max-width: 560px;
     justify-self: start;
@@ -1051,7 +1059,7 @@ textarea:focus-visible {
   .header-inner,
   .main-shell,
   .landing-hero {
-    width: min(100% - 32px, var(--container-site-max));
+    width: calc(100% - 32px);
   }
 
   .header-inner {
@@ -1080,7 +1088,7 @@ textarea:focus-visible {
   }
 
   .landing-title {
-    font-size: clamp(54px, 16vw, 78px);
+    font-size: clamp(50px, 12vw, 68px);
   }
 
   .landing-description {
@@ -1142,6 +1150,11 @@ textarea:focus-visible {
 @media (max-width: 400px) {
   .product-grid {
     grid-template-columns: 1fr;
+  }
+
+  .landing-title {
+    font-size: 42px;
+    overflow-wrap: anywhere;
   }
 
   .header-nav-button {
