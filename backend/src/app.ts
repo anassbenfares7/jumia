@@ -13,16 +13,6 @@ import reviewRoutes from './routes/reviewRoutes';
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: env.corsOrigins }));
-app.use(express.json());
-
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/vendors', vendorRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/reviews', reviewRoutes);
-
 app.get('/api/health', async (_req: Request, res: Response) => {
   try {
     await query('SELECT 1');
@@ -39,5 +29,16 @@ app.get('/api/health', async (_req: Request, res: Response) => {
     });
   }
 });
+
+app.use(cors({ origin: env.corsOrigins }));
+app.use(express.json());
+
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/vendors', vendorRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/reviews', reviewRoutes);
+
 
 export default app;
