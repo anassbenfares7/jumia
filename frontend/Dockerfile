@@ -10,6 +10,7 @@ RUN npm ci
 COPY tsconfig.json tsconfig.app.json tsconfig.node.json vite.config.ts ./
 COPY src ./src
 COPY index.html ./
+COPY public ./public
 RUN npm run build
 
 FROM nginx:1.28-alpine AS runtime

@@ -43,34 +43,46 @@ export const BuyerOrderHistory = () => {
   }, {});
 
   return (
-    <section style={{ padding: 20, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-        <h2 style={{ marginTop: 0 }}>Your Orders</h2>
-        <button onClick={() => setRefreshKey((key) => key + 1)} disabled={loading}>Refresh</button>
-      </div>
-      {errorMessage && <p role="alert" style={{ color: '#b42318' }}>{errorMessage}</p>}
-      {loading ? <p>Loading your orders...</p> : null}
-      {!loading && !errorMessage && orders.length === 0 && <p>You have not placed any demo orders yet.</p>}
-      {!loading && Object.entries(groupedOrders).map(([orderId, items]) => (
-        <article key={orderId} style={{ borderTop: '1px solid #eee', padding: '16px 0' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-            <strong>Order #{orderId}</strong>
-            <span>{new Date(items[0].created_at).toLocaleString()}</span>
-          </div>
-          <p style={{ margin: '8px 0', color: '#7a4b00' }}>
-            Demo order — unpaid (payment status: {items[0].payment_status})
-          </p>
-          <ul style={{ paddingLeft: 20 }}>
-            {items.map((item) => (
-              <li key={item.order_item_id}>
-                {item.product_title} — {item.quantity} × {Number(item.price_per_unit).toFixed(2)} DH
-                {' · '}{item.business_name} · fulfillment: {item.item_status}
-              </li>
-            ))}
-          </ul>
-          <strong>Order total: {Number(items[0].total_amount).toFixed(2)} DH</strong>
-        </article>
-      ))}
+    <section className="dashboard-stack">
+      <header className="dashboard-header">
+        <div>
+          <p className="eyebrow">Your account</p>
+          <h1>Your orders</h1>
+          <p>Track the details and fulfillment of your marketplace orders.</p>
+        </div>
+        <button className="button-outline" onClick={() => setRefreshKey((key) => key + 1)} disabled={loading}>
+          Refresh orders
+        </button>
+      </header>
+      {errorMessage && <p className="alert alert--error" role="alert">{errorMessage}</p>}
+      {loading && <p className="loading-state">Loading your orders…</p>}
+      {!loading && !errorMessage && orders.length === 0 && (
+        <p className="empty-state">You haven’t placed an order yet. Your next great find is out there.</p>
+      )}
+      {!loading && orders.length > 0 && (
+        <div className="dashboard-card">
+          {Object.entries(groupedOrders).map(([orderId, items]) => (
+            <article className="order-card" key={orderId}>
+              <div className="order-card-header">
+                <strong>Order #{orderId}</strong>
+                <time dateTime={items[0].created_at}>{new Date(items[0].created_at).toLocaleString()}</time>
+              </div>
+              <p className="alert alert--notice">
+                Demo order · Unpaid (payment status: {items[0].payment_status})
+              </p>
+              <ul>
+                {items.map((item) => (
+                  <li key={item.order_item_id}>
+                    {item.product_title} — {item.quantity} × {Number(item.price_per_unit).toFixed(2)} DH
+                    {' · '}{item.business_name} · fulfillment: {item.item_status}
+                  </li>
+                ))}
+              </ul>
+              <strong>Order total: {Number(items[0].total_amount).toFixed(2)} DH</strong>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 };

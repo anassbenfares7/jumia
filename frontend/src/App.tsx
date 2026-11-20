@@ -98,79 +98,99 @@ function App() {
   };
 
   return (
-    <div style={{ backgroundColor: '#f5f5f5', minHeight: '100vh', margin: 0, padding: 0, fontFamily: 'sans-serif' }}>
-      {/* Global Brand Navigation Header bar */}
-      <header style={{ backgroundColor: '#fff', borderBottom: '1px solid #e0e0e0', padding: '15px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-        <h1 style={{ color: '#f57c00', margin: 0, fontSize: '26px', fontWeight: 'black', letterSpacing: '-0.5px' }}>
-          JUMIA <span style={{ color: '#333', fontSize: '16px', fontWeight: 'normal' }}>Clone Workspace</span>
-        </h1>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+    <div className="app-shell">
+      <header className={`site-header${user ? '' : ' site-header--landing'}`}>
+        <div className="header-inner">
+          <a
+            className="brand-lockup"
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              if (user?.role === 'buyer') setActiveView('marketplace');
+            }}
+          >
+            <span className="brand-wordmark">jumia</span>
+            <span className="brand-caption">marketplace</span>
+          </a>
+
           {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-              {user.role === 'buyer' && (
-                <nav aria-label="Buyer navigation" style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => setActiveView('marketplace')} aria-pressed={activeView === 'marketplace'}>Marketplace</button>
-                  <button onClick={() => setActiveView('orders')} aria-pressed={activeView === 'orders'}>My Orders</button>
-                </nav>
-              )}
-              {user.role === 'vendor' && (
-                <button onClick={() => setActiveView('vendor')} aria-pressed={activeView === 'vendor'}>Vendor Workspace</button>
-              )}
-              {user.role === 'admin' && (
-                <button onClick={() => setActiveView('admin')} aria-pressed={activeView === 'admin'}>Admin Workspace</button>
-              )}
-              <span style={{ fontSize: '14px', color: '#555' }}>
-                Welcome, <span style={{ fontWeight: 'bold', color: '#333' }}>{user.name}</span> 
-                <span style={{ marginLeft: '8px', padding: '3px 8px', borderRadius: '12px', backgroundColor: '#f57c0020', color: '#f57c00', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase' }}>
-                  {user.role}
-                </span>
-              </span>
-              <button onClick={handleLogout} style={{ padding: '6px 12px', border: '1px solid #ccc', borderRadius: '4px', backgroundColor: '#fff', color: '#d32f2f', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>
-                Logout
-              </button>
+            <div className="header-actions">
+              <nav className="header-nav" aria-label="Main navigation">
+                {user.role === 'buyer' && (
+                  <>
+                    <button className="header-nav-button" onClick={() => setActiveView('marketplace')} aria-pressed={activeView === 'marketplace'}>
+                      Discover
+                    </button>
+                    <button className="header-nav-button" onClick={() => setActiveView('orders')} aria-pressed={activeView === 'orders'}>
+                      My orders
+                    </button>
+                  </>
+                )}
+                {user.role === 'vendor' && (
+                  <button className="header-nav-button" onClick={() => setActiveView('vendor')} aria-pressed={activeView === 'vendor'}>
+                    Seller studio
+                  </button>
+                )}
+                {user.role === 'admin' && (
+                  <button className="header-nav-button" onClick={() => setActiveView('admin')} aria-pressed={activeView === 'admin'}>
+                    Admin
+                  </button>
+                )}
+              </nav>
+              <div className="header-user">
+                <span className="user-greeting">Hi, <strong>{user.name}</strong></span>
+                <span className="role-pill">{user.role}</span>
+                <button className="button-outline button-small" onClick={handleLogout}>Sign out</button>
+              </div>
             </div>
           ) : (
-            <span style={{ fontSize: '14px', color: '#888', fontWeight: 'bold' }}>Guest Session Dashboard</span>
+            <span className="brand-caption">A marketplace for good finds</span>
           )}
         </div>
       </header>
 
-      {/* Main Responsive Grid Layout Content */}
-      <main style={{ maxWidth: '1400px', margin: '30px auto', padding: '0 20px', display: 'grid', gridTemplateColumns: '1fr', gap: '30px' }}>
-        
-        {/* If the current session tracking context is completely unauthenticated, serve the gateway gate */}
-        {!user && <AuthCard onAuthSuccess={handleAuthSuccess} />}
-
-        {!user && (
-          <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '30px', alignItems: 'start', opacity: 0.4, pointerEvents: 'none' }}>
-            <div style={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e0e0e0', padding: '15px' }}>
-              <h2 style={{ margin: '0 0 10px 10px', color: '#333', fontSize: '20px' }}>Discover Jumia Listings</h2>
-              <ProductCatalog onAddToCart={handleAddToCart} />
+      {!user ? (
+        <main className="landing-main">
+          <section className="landing-hero">
+            <div className="landing-copy">
+              <p className="eyebrow">Good finds. Great stories.</p>
+              <h1 className="landing-title">A little more <em>meaning</em> in every find.</h1>
+              <p className="landing-description">
+                Discover independent sellers and thoughtful finds, all in one welcoming marketplace.
+              </p>
+              <p className="landing-note">Browse the marketplace, meet local sellers, and find your next favorite.</p>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-              <CartDrawer cartItems={cart} onRemoveItem={handleRemoveFromCart} onClearCart={handleClearCart} />
-              <div style={{ padding: '15px', border: '1px dashed #f57c00', borderRadius: '8px', backgroundColor: '#f57c0005', color: '#f57c00', textAlign: 'center', fontSize: '14px', fontWeight: 'bold' }}>
-                Sign in as a buyer to use the cart and demo checkout.
+            <div className="auth-panel">
+              <AuthCard onAuthSuccess={handleAuthSuccess} />
+            </div>
+          </section>
+          <footer className="app-footer">Jumia Marketplace · Discover something worth keeping.</footer>
+        </main>
+      ) : (
+        <main className="main-shell">
+          {user.role === 'buyer' && activeView === 'marketplace' && (
+            <>
+              <section className="workspace-heading">
+                <div className="workspace-heading-copy">
+                  <p className="eyebrow">The marketplace</p>
+                  <h1 className="page-title">Find your next favorite.</h1>
+                  <p className="page-subtitle">A fresh mix of products from independent sellers.</p>
+                </div>
+                <span className="status-pill">{cart.reduce((count, item) => count + item.quantity, 0)} items in your cart</span>
+              </section>
+              <div className="market-layout">
+                <section className="market-column" aria-label="Product listings">
+                  <ProductCatalog onAddToCart={handleAddToCart} />
+                </section>
+                <CartDrawer cartItems={cart} onRemoveItem={handleRemoveFromCart} onClearCart={handleClearCart} />
               </div>
-            </div>
-          </div>
-        )}
-
-        {user?.role === 'buyer' && activeView === 'marketplace' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '30px', alignItems: 'start' }}>
-            <div style={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e0e0e0', padding: '15px' }}>
-              <h2 style={{ margin: '0 0 10px 10px', color: '#333', fontSize: '20px' }}>Discover Jumia Listings</h2>
-              <ProductCatalog onAddToCart={handleAddToCart} />
-            </div>
-            <CartDrawer cartItems={cart} onRemoveItem={handleRemoveFromCart} onClearCart={handleClearCart} />
-          </div>
-        )}
-        {user?.role === 'buyer' && activeView === 'orders' && <BuyerOrderHistory />}
-        {user?.role === 'vendor' && activeView === 'vendor' && <VendorDashboard />}
-        {user?.role === 'admin' && activeView === 'admin' && <AdminDashboard />}
-
-      </main>
+            </>
+          )}
+          {user.role === 'buyer' && activeView === 'orders' && <BuyerOrderHistory />}
+          {user.role === 'vendor' && activeView === 'vendor' && <VendorDashboard />}
+          {user.role === 'admin' && activeView === 'admin' && <AdminDashboard />}
+        </main>
+      )}
     </div>
   );
 }

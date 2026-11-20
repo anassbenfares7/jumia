@@ -83,48 +83,59 @@ export const AdminDashboard = () => {
   };
 
   return (
-    <section style={{ display: 'grid', gap: 20 }}>
-      <header style={{ padding: 20, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8 }}>
-        <h2 style={{ marginTop: 0 }}>Admin Workspace</h2>
-        <p>Review vendor applications and moderate public product listings.</p>
-        <button onClick={() => setRefreshKey((key) => key + 1)} disabled={loading}>Refresh dashboard</button>
+    <section className="dashboard-stack">
+      <header className="dashboard-header">
+        <div>
+          <p className="eyebrow">Marketplace operations</p>
+          <h2>Admin workspace</h2>
+          <p>Review seller applications and keep the marketplace in good shape.</p>
+        </div>
+        <button className="button-outline" onClick={() => setRefreshKey((key) => key + 1)} disabled={loading}>
+          Refresh workspace
+        </button>
       </header>
-      {errorMessage && <p role="alert" style={{ color: '#b42318' }}>{errorMessage}</p>}
-      {successMessage && <p role="status" style={{ color: '#067647' }}>{successMessage}</p>}
+      {errorMessage && <p className="alert alert--error" role="alert">{errorMessage}</p>}
+      {successMessage && <p className="alert alert--success" role="status">{successMessage}</p>}
 
-      <div style={{ padding: 20, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8 }}>
-        <h3 style={{ marginTop: 0 }}>Pending vendor applications</h3>
-        {!loading && vendors.length === 0 ? <p>No vendor applications are waiting for approval.</p> : (
-          <div style={{ display: 'grid', gap: 10 }}>
+      <div className="dashboard-card">
+        <h3>Seller applications</h3>
+        {!loading && vendors.length === 0 ? <p className="empty-state">No seller applications are waiting for review.</p> : (
+          <div className="data-list">
             {vendors.map((vendor) => (
-              <div key={vendor.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, borderTop: '1px solid #eee', paddingTop: 10 }}>
-                <span><strong>{vendor.business_name}</strong> · {vendor.phone_number}</span>
-                <button onClick={() => void approveVendor(vendor)}>Approve</button>
+              <div className="data-row" key={vendor.id}>
+                <div className="data-row-copy">
+                  <strong>{vendor.business_name}</strong>
+                  <p>{vendor.phone_number} · Applied {new Date(vendor.created_at).toLocaleDateString()}</p>
+                </div>
+                <button className="button-accent button-small" onClick={() => void approveVendor(vendor)}>Approve</button>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      <div style={{ padding: 20, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8 }}>
-        <h3 style={{ marginTop: 0 }}>Product moderation</h3>
-        {loading ? <p>Loading products...</p> : products.length === 0 ? <p>There are no products to moderate.</p> : (
-          <div style={{ display: 'grid', gap: 10 }}>
+      <div className="dashboard-card">
+        <h3>Product moderation</h3>
+        {loading ? <p className="loading-state">Loading products…</p> : products.length === 0 ? <p className="empty-state">There are no products to review.</p> : (
+          <div className="data-list">
             {products.map((product) => (
-              <div key={product.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, borderTop: '1px solid #eee', paddingTop: 10 }}>
-                <span><strong>{product.title}</strong> · {product.business_name} · {Number(product.price).toFixed(2)} DH</span>
-                <button onClick={() => void removeProduct(product)} disabled={savingProductId === product.id}>
-                  {savingProductId === product.id ? 'Removing...' : 'Remove'}
+              <div className="data-row" key={product.id}>
+                <div className="data-row-copy">
+                  <strong>{product.title}</strong>
+                  <p>{product.business_name} · {Number(product.price).toFixed(2)} DH</p>
+                </div>
+                <button className="button-danger button-small" onClick={() => void removeProduct(product)} disabled={savingProductId === product.id}>
+                  {savingProductId === product.id ? 'Removing…' : 'Remove'}
                 </button>
               </div>
             ))}
           </div>
         )}
         {totalPages > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 16 }}>
-            <button disabled={page <= 1 || loading} onClick={() => setPage((current) => current - 1)}>Previous</button>
+          <div className="pagination">
+            <button className="button-outline button-small" disabled={page <= 1 || loading} onClick={() => setPage((current) => current - 1)}>Previous</button>
             <span>Page {page} of {totalPages}</span>
-            <button disabled={page >= totalPages || loading} onClick={() => setPage((current) => current + 1)}>Next</button>
+            <button className="button-outline button-small" disabled={page >= totalPages || loading} onClick={() => setPage((current) => current + 1)}>Next</button>
           </div>
         )}
       </div>

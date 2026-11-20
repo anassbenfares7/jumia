@@ -139,39 +139,44 @@ export const VendorDashboard = () => {
     }
   };
 
-  if (loading && !profileLoaded) return <p>Loading vendor dashboard...</p>;
+  if (loading && !profileLoaded) return <p className="loading-state">Loading seller studio…</p>;
 
   return (
-    <section style={{ display: 'grid', gap: 20 }}>
-      <header style={{ padding: 20, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8 }}>
-        <h2 style={{ marginTop: 0 }}>Vendor Workspace</h2>
-        <p>Manage your business profile, listings, and order fulfillment.</p>
-        <button onClick={() => setRefreshKey((key) => key + 1)} disabled={loading}>Refresh dashboard</button>
+    <section className="dashboard-stack">
+      <header className="dashboard-header">
+        <div>
+          <p className="eyebrow">Seller studio</p>
+          <h2>Make good things happen.</h2>
+          <p>Manage your business, listings, and orders in one place.</p>
+        </div>
+        <button className="button-outline" onClick={() => setRefreshKey((key) => key + 1)} disabled={loading}>
+          Refresh studio
+        </button>
       </header>
-
-      {errorMessage && <p role="alert" style={{ color: '#b42318' }}>{errorMessage}</p>}
-      {successMessage && <p role="status" style={{ color: '#067647' }}>{successMessage}</p>}
+      {errorMessage && <p className="alert alert--error" role="alert">{errorMessage}</p>}
+      {successMessage && <p className="alert alert--success" role="status">{successMessage}</p>}
 
       {!profile && (
-        <form onSubmit={registerProfile} style={{ display: 'grid', gap: 12, padding: 20, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8 }}>
-          <h3 style={{ margin: 0 }}>Register your business</h3>
-          <label>
+        <form className="dashboard-card dashboard-form" onSubmit={registerProfile}>
+          <h3>Register your business</h3>
+          <label className="form-field">
             Business name
-            <input required maxLength={255} value={businessName} onChange={(event) => setBusinessName(event.target.value)} />
+            <input required maxLength={255} autoComplete="organization" value={businessName} onChange={(event) => setBusinessName(event.target.value)} />
           </label>
-          <label>
+          <label className="form-field">
             Contact phone
-            <input required maxLength={50} value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value)} />
+            <input required maxLength={50} autoComplete="tel" value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value)} />
           </label>
-          <button type="submit" disabled={saving}>{saving ? 'Submitting...' : 'Submit for approval'}</button>
+          <button className="button-accent" type="submit" disabled={saving}>{saving ? 'Submitting…' : 'Submit for approval'}</button>
         </form>
       )}
 
       {profile && (
-        <div style={{ padding: 20, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8 }}>
-          <h3 style={{ marginTop: 0 }}>{profile.business_name}</h3>
-          <p>Contact: {profile.phone_number}</p>
-          <strong style={{ color: profile.is_approved ? '#067647' : '#9a6700' }}>
+        <div className="dashboard-card">
+          <p className="eyebrow">Business profile</p>
+          <h3>{profile.business_name}</h3>
+          <p className="muted-copy">Contact: {profile.phone_number}</p>
+          <strong className={`status-pill ${profile.is_approved ? 'status-approved' : 'status-pending'}`}>
             {profile.is_approved ? 'Approved — you can manage listings and orders.' : 'Pending admin approval'}
           </strong>
         </div>
@@ -179,56 +184,65 @@ export const VendorDashboard = () => {
 
       {profile?.is_approved && (
         <>
-          <form onSubmit={createProduct} style={{ display: 'grid', gap: 12, padding: 20, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8 }}>
-            <h3 style={{ margin: 0 }}>Add a product</h3>
-            <label>
+          <form className="dashboard-card dashboard-form" onSubmit={createProduct}>
+            <h3>Add a product</h3>
+            <label className="form-field">
               Category
               <select required value={productForm.categoryId} onChange={(event) => setProductForm({ ...productForm, categoryId: event.target.value })}>
                 <option value="">Choose a category</option>
                 {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
               </select>
             </label>
-            <label>Product name<input required maxLength={255} value={productForm.title} onChange={(event) => setProductForm({ ...productForm, title: event.target.value })} /></label>
-            <label>Description<textarea required value={productForm.description} onChange={(event) => setProductForm({ ...productForm, description: event.target.value })} /></label>
-            <label>Price (DH)<input required type="number" min="0" step="0.01" value={productForm.price} onChange={(event) => setProductForm({ ...productForm, price: event.target.value })} /></label>
-            <label>Stock<input required type="number" min="0" step="1" value={productForm.stock} onChange={(event) => setProductForm({ ...productForm, stock: event.target.value })} /></label>
-            <label>Image URL (optional)<input type="url" value={productForm.imageUrl} onChange={(event) => setProductForm({ ...productForm, imageUrl: event.target.value })} /></label>
-            <button type="submit" disabled={saving || categories.length === 0}>{saving ? 'Saving...' : 'Create listing'}</button>
+            <label className="form-field">Product name<input required maxLength={255} value={productForm.title} onChange={(event) => setProductForm({ ...productForm, title: event.target.value })} /></label>
+            <label className="form-field">Description<textarea required value={productForm.description} onChange={(event) => setProductForm({ ...productForm, description: event.target.value })} /></label>
+            <label className="form-field">Price (DH)<input required type="number" min="0" step="0.01" value={productForm.price} onChange={(event) => setProductForm({ ...productForm, price: event.target.value })} /></label>
+            <label className="form-field">Stock<input required type="number" min="0" step="1" value={productForm.stock} onChange={(event) => setProductForm({ ...productForm, stock: event.target.value })} /></label>
+            <label className="form-field">Image URL (optional)<input type="url" value={productForm.imageUrl} onChange={(event) => setProductForm({ ...productForm, imageUrl: event.target.value })} /></label>
+            <button className="button-accent" type="submit" disabled={saving || categories.length === 0}>{saving ? 'Saving…' : 'Create listing'}</button>
           </form>
 
-          <div style={{ padding: 20, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8 }}>
-            <h3 style={{ marginTop: 0 }}>Your products</h3>
-            <p>Product editing and vendor-side removal are not available in this demo.</p>
-            {products.length === 0 ? <p>You have no listings yet.</p> : (
-              <ul>{products.map((product) => (
-                <li key={product.id}>{product.title} — {product.category_name}, {Number(product.price).toFixed(2)} DH, stock: {product.stock}</li>
-              ))}</ul>
+          <div className="dashboard-card">
+            <h3>Your listings</h3>
+            <p className="muted-copy">Product editing and vendor-side removal are not available in this demo.</p>
+            {products.length === 0 ? <p className="empty-state">You haven’t listed a product yet.</p> : (
+              <div className="data-list">{products.map((product) => (
+                <div className="data-row" key={product.id}>
+                  <div className="data-row-copy">
+                    <strong>{product.title}</strong>
+                    <p>{product.category_name} · {Number(product.price).toFixed(2)} DH · Stock: {product.stock}</p>
+                  </div>
+                </div>
+              ))}</div>
             )}
           </div>
 
-          <div style={{ padding: 20, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8 }}>
-            <h3 style={{ marginTop: 0 }}>Orders to fulfill</h3>
-            {orders.length === 0 ? <p>No orders are assigned to your store yet.</p> : (
-              <div style={{ display: 'grid', gap: 12 }}>
+          <div className="dashboard-card">
+            <h3>Orders to fulfill</h3>
+            {orders.length === 0 ? <p className="empty-state">No orders are assigned to your store yet.</p> : (
+              <div className="data-list">
                 {orders.map((order) => (
-                  <div key={order.order_item_id} style={{ padding: 12, border: '1px solid #eee', borderRadius: 6 }}>
-                    <strong>{order.product_title}</strong>
-                    <p style={{ margin: '6px 0' }}>
-                      Buyer: {order.buyer_name} · Quantity: {order.quantity} · {Number(order.price_per_unit).toFixed(2)} DH each
-                    </p>
-                    <label>
-                      Fulfillment status{' '}
-                      <select
-                        value={orderStatuses[order.order_item_id] || order.status}
-                        onChange={(event) => setOrderStatuses({
-                          ...orderStatuses,
-                          [order.order_item_id]: event.target.value as VendorOrder['status'],
-                        })}
-                      >
-                        {fulfillmentStatuses.map((status) => <option key={status} value={status}>{status}</option>)}
-                      </select>
-                    </label>
-                    <button onClick={() => void updateFulfillment(order)} disabled={saving}>Save status</button>
+                  <div className="order-card" key={order.order_item_id}>
+                    <div className="data-row-copy">
+                      <strong>{order.product_title}</strong>
+                      <p>Buyer: {order.buyer_name} · Quantity: {order.quantity} · {Number(order.price_per_unit).toFixed(2)} DH each</p>
+                    </div>
+                    <div className="order-status-form">
+                      <label className="form-field">
+                        Fulfillment status
+                        <select
+                          value={orderStatuses[order.order_item_id] || order.status}
+                          onChange={(event) => setOrderStatuses({
+                            ...orderStatuses,
+                            [order.order_item_id]: event.target.value as VendorOrder['status'],
+                          })}
+                        >
+                          {fulfillmentStatuses.map((status) => <option key={status} value={status}>{status}</option>)}
+                        </select>
+                      </label>
+                      <button className="button-outline button-small" onClick={() => void updateFulfillment(order)} disabled={saving}>
+                        Save status
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
